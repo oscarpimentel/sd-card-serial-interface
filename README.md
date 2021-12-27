@@ -1,3 +1,1 @@
-# snow-weather-station-project
-
-based on https://github.com/opimentel-github/snow-station
+# sd-card-serial-interface

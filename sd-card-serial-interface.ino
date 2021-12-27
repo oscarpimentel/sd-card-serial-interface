@@ -3,8 +3,9 @@
 #define BAUD_RATE 500000
 #define SD_PIN 10
 #define SD_WRITE_LEDPIN 4
+#define SD_WAITING_LEDPIN 5
 
-SerialSD serial_sd(SD_PIN, SD_WRITE_LEDPIN);
+SerialSD serial_sd(SD_PIN, SD_WRITE_LEDPIN, SD_WAITING_LEDPIN);
 
 //############################################################
 
@@ -17,5 +18,4 @@ void setup(){
 
 void loop(){
 	serial_sd.loop();
-	// serial_sd.print_info();
 }
