@@ -5,22 +5,6 @@
 
 //############################################################
 
-String split_string(String data, char delimiter, int index){
-	// https://stackoverflow.com/questions/9072320/split-string-into-string-array
-	int found = 0;
-	int strIndex[] = {0, -1};
-	int maxIndex = data.length()-1;
-
-	for (int i=0; i<=maxIndex && found<=index; i++){
-		if (data.charAt(i)==delimiter || i==maxIndex){
-			found++;
-			strIndex[0] = strIndex[1]+1;
-			strIndex[1] = (i == maxIndex) ? i+1 : i;
-		}
-	}
-	return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
-}
-
 FlagArg get_string_flag_arg(String data){
 	struct FlagArg flag_arg;
 	data.replace("\r", "");
@@ -32,7 +16,8 @@ FlagArg get_string_flag_arg(String data){
 
 //############################################################
 
-SerialSD::SerialSD(int _sd_pin, int _sd_write_ledpin, int _sd_in_ledpin, int _sd_done_ledpin, int _sd_in_buttonpin){
+SerialSD::SerialSD(SdFat* _sd_card, int _sd_pin, int _sd_write_ledpin, int _sd_in_ledpin, int _sd_done_ledpin, int _sd_in_buttonpin){
+	sd_card = _sd_card;
 	sd_pin = _sd_pin;
 	sd_write_ledpin = Ledpin(_sd_write_ledpin);
 	sd_in_ledpin = Ledpin(_sd_in_ledpin);
@@ -62,8 +47,9 @@ void SerialSD::begin_ledpins(){
 void SerialSD::begin_sd(){
 	DEBUG("begining SD card");
 	pinMode(sd_pin, OUTPUT); digitalWrite(sd_pin, HIGH);
-	while(!SD.begin(sd_pin)){
+	while(!sd_card->begin(sd_pin, SPI_FULL_SPEED)){ // SPI_FULL_SPEED SPI_HALF_SPEED
 		DEBUG(".");
+		// sd_card->initErrorHalt();
 	}
 	DEBUGLN();
 }
@@ -71,7 +57,7 @@ void SerialSD::begin_sd(){
 //############################################################
 
 void SerialSD::print_info(){
-	// Serial.print("state="); Serial.println(state);
+	// DEBUG("state="); DEBUGLN(state);
 	// print_sd_buffer();
 }
 
@@ -130,20 +116,19 @@ void SerialSD::loop(){
 		if (Serial.available()){
 			serial_str = Serial.readStringUntil('\n');
 			FlagArg flag_arg = get_string_flag_arg(serial_str);
+			DEBUGLN(flag_arg.flag);
+			DEBUGLN(flag_arg.arg);
 			if (flag_arg.flag=="--o"){
-				record_filedir = flag_arg.arg;
-				bool removed = SD.remove(record_filedir);
-				file = SD.open(record_filedir, FILE_WRITE);
-				Serial.println(removed);
+				flag_arg.arg.toCharArray(record_filedir, sizeof(record_filedir));
+				file.open(record_filedir, O_RDWR | O_CREAT | O_AT_END); // open the file
+				file.remove();
+				file.open(record_filedir, O_RDWR | O_CREAT | O_AT_END); // open the file
+				Serial.println(1);
 
 			}else if (flag_arg.flag=="--w"){
-				record_filedir = split_string(flag_arg.arg, DELIMITER, 0);
-				String buffer_text = split_string(flag_arg.arg, DELIMITER, 1);
-				DEBUGLN(record_filedir);
-				DEBUGLN(buffer_text);
 				if (file){
 					sd_write_ledpin.high();
-					file.println(buffer_text); // write buffer
+					file.println(flag_arg.arg); // write buffer
 					Serial.println(1);
 					sd_write_ledpin.low();
 				}else{

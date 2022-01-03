@@ -4,9 +4,10 @@
 #define SerialSD_h
 
 #include "Arduino.h"
-#include <SD.h>
 #include <Ledpin.h>
 #include <Buttonpin.h>
+// #include <SPI.h> // causes bug with SdFat
+#include <SdFat.h>
 
 // #define __DEBUG__
 #ifdef __DEBUG__
@@ -38,7 +39,7 @@ struct FlagArg {
 class SerialSD
 {
 	public:
-		SerialSD(int _sd_pin, int _sd_write_ledpin, int _sd_in_ledpin, int _sd_done_ledpin, int _sd_in_buttonpin);
+		SerialSD(SdFat* _sd_card, int _sd_pin, int _sd_write_ledpin, int _sd_in_ledpin, int _sd_done_ledpin, int _sd_in_buttonpin);
 		SerialSD(void); // empty constructor
 
 		// begins
@@ -59,6 +60,7 @@ class SerialSD
 		// loop
 		void loop();
 	private:
+		SdFat* sd_card;
 		int sd_pin;
 		Ledpin sd_write_ledpin;
 		Ledpin sd_in_ledpin;
@@ -67,9 +69,9 @@ class SerialSD
 
 		int state;
 		unsigned long loop_counter;
-		File file;
+		SdFile file;
 		String serial_str;
-		String record_filedir;
+		char record_filedir[20];
 };
 
 #endif
