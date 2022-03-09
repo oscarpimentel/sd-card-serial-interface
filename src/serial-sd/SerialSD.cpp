@@ -25,7 +25,9 @@ SerialSD::SerialSD(SdFat* _sd_card, int _sd_pin, int _sd_write_ledpin, int _sd_i
 	sd_in_buttonpin = Buttonpin(_sd_in_buttonpin, true);
 }
 
-SerialSD::SerialSD(void){}
+SerialSD::SerialSD(void){
+	;
+}
 
 //############################################################
 

@@ -6,7 +6,7 @@
 #include "Arduino.h"
 #include <Ledpin.h>
 #include <Buttonpin.h>
-// #include <SPI.h> // causes bug with SdFat
+// #include <SPI.h> // causes bug with SdFat?
 #include <SdFat.h>
 
 // #define __DEBUG__
@@ -18,8 +18,6 @@
 #define DEBUGLN(...)
 #endif
 
-#define DELIMITER ':'
-
 #define STATE_IDLE -1
 #define STATE_WAITING_FOR_SD_IN 0
 #define STATE_WAITING_FOR_SD_OUT 1
@@ -29,21 +27,20 @@
 
 //############################################################
 
-struct FlagArg {
-    String flag;
-    String arg;
+struct FlagArg{
+	String flag = "";
+	String arg = "";
 };
 
 //############################################################
 
-class SerialSD
-{
+class SerialSD{
 	public:
 		SerialSD(SdFat* _sd_card, int _sd_pin, int _sd_write_ledpin, int _sd_in_ledpin, int _sd_done_ledpin, int _sd_in_buttonpin);
 		SerialSD(void); // empty constructor
+		void begin();
 
 		// begins
-		void begin();
 		void begin_sd();
 		void begin_ledpins();
 
